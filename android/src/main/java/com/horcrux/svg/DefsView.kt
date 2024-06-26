@@ -13,7 +13,7 @@ import android.graphics.Paint
 import com.facebook.react.bridge.ReactContext
 
 @SuppressLint("ViewConstructor")
-internal class DefsView(reactContext: ReactContext?) : DefinitionView(reactContext) {
+internal class DefsView(reactContext: ReactContext) : DefinitionView(reactContext) {
     public override fun draw(canvas: Canvas, paint: Paint, opacity: Float) {}
     public override fun saveDefinition() {
         for (i in 0 until childCount) {

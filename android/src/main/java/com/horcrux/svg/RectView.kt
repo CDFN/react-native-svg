@@ -17,7 +17,7 @@ import com.facebook.react.bridge.Dynamic
 import com.facebook.react.bridge.ReactContext
 
 @SuppressLint("ViewConstructor")
-internal class RectView(reactContext: ReactContext?) : RenderableView(reactContext) {
+internal class RectView(reactContext: ReactContext) : RenderableView(reactContext) {
     private var mX: SVGLength? = null
     private var mY: SVGLength? = null
     private var mW: SVGLength? = null

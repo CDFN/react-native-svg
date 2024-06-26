@@ -18,14 +18,15 @@ import com.horcrux.svg.Brush.BrushType
 import com.horcrux.svg.Brush.BrushUnits
 
 @SuppressLint("ViewConstructor")
-internal class LinearGradientView(reactContext: ReactContext?) : DefinitionView(reactContext) {
+internal class LinearGradientView(reactContext: ReactContext) : DefinitionView(reactContext) {
     private var mX1: SVGLength? = null
     private var mY1: SVGLength? = null
     private var mX2: SVGLength? = null
     private var mY2: SVGLength? = null
     private var mGradient: ReadableArray? = null
     private var mGradientUnits: BrushUnits? = null
-    override var mMatrix: Matrix? = null
+    private var mLinearGradientMatrix: Matrix? = null
+
     fun setX1(x1: Dynamic) {
         mX1 = SVGLength.Companion.from(x1)
         invalidate()
@@ -63,15 +64,15 @@ internal class LinearGradientView(reactContext: ReactContext?) : DefinitionView(
         if (matrixArray != null) {
             val matrixSize: Int = PropHelper.toMatrixData(matrixArray, sRawMatrix, mScale)
             if (matrixSize == 6) {
-                if (mMatrix == null) {
-                    mMatrix = Matrix()
+                if (mLinearGradientMatrix == null) {
+                    mLinearGradientMatrix = Matrix()
                 }
-                mMatrix!!.setValues(sRawMatrix)
+                mLinearGradientMatrix!!.setValues(sRawMatrix)
             } else if (matrixSize != -1) {
                 FLog.w(ReactConstants.TAG, "RNSVG: Transform matrices must be of size 6")
             }
         } else {
-            mMatrix = null
+            mLinearGradientMatrix = null
         }
         invalidate()
     }
@@ -81,8 +82,8 @@ internal class LinearGradientView(reactContext: ReactContext?) : DefinitionView(
             val points: Array<SVGLength?> = arrayOf(mX1, mY1, mX2, mY2)
             val brush: Brush = Brush(BrushType.LINEAR_GRADIENT, points, mGradientUnits)
             brush.setGradientColors(mGradient)
-            if (mMatrix != null) {
-                brush.setGradientTransform(mMatrix)
+            if (mLinearGradientMatrix != null) {
+                brush.setGradientTransform(mLinearGradientMatrix)
             }
             val svg: SvgView? = svgView
             if (mGradientUnits == BrushUnits.USER_SPACE_ON_USE) {

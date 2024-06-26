@@ -16,7 +16,7 @@ import com.facebook.react.bridge.Dynamic
 import com.facebook.react.bridge.ReactContext
 
 @SuppressLint("ViewConstructor")
-internal class EllipseView(reactContext: ReactContext?) : RenderableView(reactContext) {
+internal class EllipseView(reactContext: ReactContext) : RenderableView(reactContext) {
     private var mCx: SVGLength? = null
     private var mCy: SVGLength? = null
     private var mRx: SVGLength? = null

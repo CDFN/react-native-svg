@@ -31,10 +31,10 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 @SuppressLint("ViewConstructor")
-public abstract class VirtualView internal constructor(val mContext: ReactContext?) : ReactViewGroup(mContext) {
+abstract class VirtualView internal constructor(val mContext: ReactContext) : ReactViewGroup(mContext) {
     var mOpacity: Float = 1f
     var mCTM: Matrix = Matrix()
-    public open var mMatrix: Matrix? = Matrix()
+    var mMatrix: Matrix? = Matrix()
     var mTransform: Matrix = Matrix()
     var mInvCTM: Matrix = Matrix()
     var mInvMatrix: Matrix = Matrix()

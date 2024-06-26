@@ -15,7 +15,7 @@ import com.facebook.react.bridge.Dynamic
 import com.facebook.react.bridge.ReactContext
 
 @SuppressLint("ViewConstructor")
-internal class CircleView(reactContext: ReactContext?) : RenderableView(reactContext) {
+internal class CircleView(reactContext: ReactContext) : RenderableView(reactContext) {
     private var mCx: SVGLength? = null
     private var mCy: SVGLength? = null
     private var mR: SVGLength? = null

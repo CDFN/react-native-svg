@@ -18,7 +18,7 @@ import com.facebook.react.bridge.ReactContext
 import com.facebook.react.common.ReactConstants
 
 @SuppressLint("ViewConstructor")
-internal class UseView(reactContext: ReactContext?) : RenderableView(reactContext) {
+internal class UseView(reactContext: ReactContext) : RenderableView(reactContext) {
     private var mHref: String? = null
     private var mX: SVGLength? = null
     private var mY: SVGLength? = null

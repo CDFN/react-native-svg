@@ -14,7 +14,7 @@ import android.graphics.Path
 import com.facebook.react.bridge.ReactContext
 
 @SuppressLint("ViewConstructor")
-internal open class DefinitionView(reactContext: ReactContext?) : VirtualView(reactContext) {
+internal open class DefinitionView(reactContext: ReactContext) : VirtualView(reactContext) {
     public override fun draw(canvas: Canvas, paint: Paint, opacity: Float) {}
     override var isResponsible: Boolean
         get() {

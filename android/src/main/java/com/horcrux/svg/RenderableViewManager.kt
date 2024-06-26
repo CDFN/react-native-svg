@@ -12,6 +12,7 @@ import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup.OnHierarchyChangeListener
 import com.facebook.react.bridge.Dynamic
+import com.facebook.react.bridge.JavaOnlyArray
 import com.facebook.react.bridge.JavaOnlyMap
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap

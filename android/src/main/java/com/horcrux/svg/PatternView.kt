@@ -32,7 +32,7 @@ class PatternView(reactContext: ReactContext) : GroupView(reactContext) {
     private var mVbHeight: Float = 0f
     var mAlign: String? = null
     var mMeetOrSlice: Int = 0
-    override var mMatrix: Matrix? = null
+    var mPatternMatrix: Matrix? = null
 
     fun setX(x: Dynamic) {
         mX = SVGLength.Companion.from(x)
@@ -74,15 +74,15 @@ class PatternView(reactContext: ReactContext) : GroupView(reactContext) {
         if (matrixArray != null) {
             val matrixSize: Int = PropHelper.toMatrixData(matrixArray, sRawMatrix, mScale)
             if (matrixSize == 6) {
-                if (mMatrix == null) {
-                    mMatrix = Matrix()
+                if (mPatternMatrix == null) {
+                    mPatternMatrix = Matrix()
                 }
-                mMatrix!!.setValues(sRawMatrix)
+                mPatternMatrix!!.setValues(sRawMatrix)
             } else if (matrixSize != -1) {
                 FLog.w(ReactConstants.TAG, "RNSVG: Transform matrices must be of size 6")
             }
         } else {
-            mMatrix = null
+            mPatternMatrix = null
         }
         invalidate()
     }
@@ -129,8 +129,8 @@ class PatternView(reactContext: ReactContext) : GroupView(reactContext) {
             val brush: Brush = Brush(BrushType.PATTERN, points, mPatternUnits)
             brush.setContentUnits(mPatternContentUnits)
             brush.setPattern(this)
-            if (mMatrix != null) {
-                brush.setGradientTransform(mMatrix)
+            if (mPatternMatrix != null) {
+                brush.setGradientTransform(mPatternMatrix)
             }
             val svg: SvgView? = svgView
             if ((mPatternUnits == BrushUnits.USER_SPACE_ON_USE

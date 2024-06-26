@@ -42,7 +42,7 @@ const val JOIN_ROUND: Int = 1
 const val CAP_ROUND: Int = 1
 const val FILL_RULE_NONZERO: Int = 1
 
-abstract class RenderableView internal constructor(reactContext: ReactContext?) : VirtualView(reactContext), ReactHitSlopView {
+abstract class RenderableView internal constructor(reactContext: ReactContext) : VirtualView(reactContext), ReactHitSlopView {
     // static final int VECTOR_EFFECT_INHERIT = 2;
     // static final int VECTOR_EFFECT_URI = 3;
     /*
@@ -239,11 +239,6 @@ abstract class RenderableView internal constructor(reactContext: ReactContext?) 
 
     fun setStrokeWidth(strokeWidth: Dynamic) {
         this.strokeWidth = if (strokeWidth.isNull()) SVGLength(1.0) else SVGLength.Companion.from(strokeWidth)
-        invalidate()
-    }
-
-    fun setStrokeWidth(strokeWidth: ReadableArray) {
-        this.strokeWidth = SVGLength(1.0)
         invalidate()
     }
 
@@ -566,7 +561,7 @@ abstract class RenderableView internal constructor(reactContext: ReactContext?) 
             return
         }
         mOriginProperties = ArrayList()
-        attributeList = if (mPropList == null) ArrayList() else ArrayList(mPropList)
+        attributeList = ArrayList(mPropList)
         var i: Int = 0
         val size: Int = targetAttributeList.size
         while (i < size) {

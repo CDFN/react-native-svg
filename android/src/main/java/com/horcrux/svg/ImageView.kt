@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.Nonnull
 
 @SuppressLint("ViewConstructor")
-internal class ImageView(reactContext: ReactContext?) : RenderableView(reactContext) {
+internal class ImageView(reactContext: ReactContext) : RenderableView(reactContext) {
     private var mX: SVGLength? = null
     private var mY: SVGLength? = null
     private var mW: SVGLength? = null
