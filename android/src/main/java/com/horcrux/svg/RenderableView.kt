@@ -68,7 +68,7 @@ abstract class RenderableView internal constructor(reactContext: ReactContext) :
         }
     var strokeDashoffset: Float = 0f
         set(value) {
-            field = value
+            field = value * mScale
             invalidate()
         }
     var strokeLinecap: Cap = Cap.BUTT
@@ -267,7 +267,7 @@ abstract class RenderableView internal constructor(reactContext: ReactContext) :
             attributeList = ArrayList()
             mPropList = attributeList
             for (i in 0 until propList.size()) {
-                mPropList!!.add(propList.getString(i))
+                mPropList.add(propList.getString(i))
             }
         }
         invalidate()
@@ -338,8 +338,6 @@ abstract class RenderableView internal constructor(reactContext: ReactContext) :
         val computePaths: Boolean = mPath == null
         if (computePaths) {
             mPath = getPath(canvas, paint)
-            println(getPath(canvas, paint))
-            println(mPath)
             mPath!!.fillType = fillRule
         }
         val nonScalingStroke: Boolean = vectorEffect == VECTOR_EFFECT_NON_SCALING_STROKE
@@ -573,9 +571,6 @@ abstract class RenderableView internal constructor(reactContext: ReactContext) :
                 mOriginProperties.add(getter.invoke(this))
                 if (!hasOwnProperty(fieldName)) {
                     attributeList.add(fieldName)
-                    if (value == null) {
-                        continue
-                    }
                     val setters = javaClass.methods.filter { it.name == "set${fieldName.replaceFirstChar { ch -> ch.titlecaseChar() }}" }
                     val setterWithSpecificType = setters.find { it.parameterTypes.first().isAssignableFrom(getter.returnType) }
                             ?: throw IllegalStateException("no setter with ${getter.returnType.name} value type found in ${javaClass.name} for property $fieldName. Make sure it is var, not val")
