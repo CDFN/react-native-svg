@@ -90,10 +90,11 @@ abstract class RenderableView internal constructor(reactContext: ReactContext) :
     private var attributeList: ArrayList<String> = ArrayList()
 
 
-    override val hitSlopRect: Rect?
-        get() = if (mPointerEvents == PointerEvents.BOX_NONE) {
+    override fun getHitSlopRect(): Rect? {
+        return if (mPointerEvents == PointerEvents.BOX_NONE) {
             Rect(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
         } else null
+    }
 
     init {
         setPivotX(0f)
@@ -225,12 +226,8 @@ abstract class RenderableView internal constructor(reactContext: ReactContext) :
 
     fun setStrokeDasharray(dynamicStrokeDasharray: Dynamic) {
         if (!dynamicStrokeDasharray.isNull()) {
-            val strokeDasharray: ReadableArray = dynamicStrokeDasharray.asArray()
-            val fromSize: Int = strokeDasharray.size()
-            this.strokeDasharray = arrayOfNulls(fromSize)
-            for (i in 0 until fromSize) {
-                this.strokeDasharray!![i] = SVGLength.from(strokeDasharray.getDynamic(i))
-            }
+            val arrayList = SVGLength.arrayFrom(dynamicStrokeDasharray)!!
+            strokeDasharray = arrayList.toArray(arrayOf(SVGLength(0.0)))
         } else {
             strokeDasharray = null
         }
