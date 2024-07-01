@@ -52,7 +52,7 @@ internal object PathParser {
             val first_char: Char = s!!.get(i)
             if (!has_prev_cmd && (first_char != 'M') && (first_char != 'm')) {
                 // The first segment must be a MoveTo.
-                throw Error(String.format("Unexpected character '%c' (i=%d, s=%s)", first_char, i, s))
+                throw IllegalArgumentException(String.format("Unexpected character '%c' (i=%d, s=%s)", first_char, i, s))
             }
 
             // TODO: simplify
@@ -65,7 +65,7 @@ internal object PathParser {
             } else if (is_number_start(first_char) && has_prev_cmd) {
                 if (prev_cmd == 'Z' || prev_cmd == 'z') {
                     // ClosePath cannot be followed by a number.
-                    throw Error(String.format("Unexpected number after 'z' (s=%s)", s))
+                    throw IllegalArgumentException(String.format("Unexpected number after 'z' (s=%s)", s))
                 }
                 if (prev_cmd == 'M' || prev_cmd == 'm') {
                     // 'If a moveto is followed by multiple pairs of coordinates,
@@ -82,7 +82,7 @@ internal object PathParser {
                     cmd = prev_cmd
                 }
             } else {
-                throw Error(String.format("Unexpected character '%c' (i=%d, s=%s)", first_char, i, s))
+                throw IllegalArgumentException(String.format("Unexpected character '%c' (i=%d, s=%s)", first_char, i, s))
             }
             val absolute: Boolean = is_absolute(cmd)
             when (cmd) {
@@ -554,7 +554,7 @@ internal object PathParser {
                 c = s!!.get(i)
             }
         } else if (c != '.') {
-            throw Error(String.format("Invalid number formating character '%c' (i=%d, s=%s)", c, i, s))
+            throw IllegalArgumentException(String.format("Invalid number formating character '%c' (i=%d, s=%s)", c, i, s))
         }
 
         // Consume fraction.
@@ -577,7 +577,7 @@ internal object PathParser {
                 } else if (c >= '0' && c <= '9') {
                     skip_digits()
                 } else {
-                    throw Error(String.format("Invalid number formating character '%c' (i=%d, s=%s)", c, i, s))
+                    throw IllegalArgumentException(String.format("Invalid number formating character '%c' (i=%d, s=%s)", c, i, s))
                 }
             }
         }
@@ -586,7 +586,7 @@ internal object PathParser {
 
         // inf, nan, etc. are an error.
         if (java.lang.Float.isInfinite(n) || java.lang.Float.isNaN(n)) {
-            throw Error(String.format("Invalid number '%s' (start=%d, i=%d, s=%s)", num, start, i, s))
+            throw IllegalArgumentException(String.format("Invalid number '%s' (start=%d, i=%d, s=%s)", num, start, i, s))
         }
         return n
     }
