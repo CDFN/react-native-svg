@@ -24,6 +24,47 @@ def isNewArchitectureEnabled() {
     return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
 }
 
+def safeAppExtGet(prop, fallback) {
+    def appProject = rootProject.allprojects.find { it.plugins.hasPlugin('com.android.application') }
+    appProject?.ext?.has(prop) ? appProject.ext.get(prop) : fallback
+}
+
+def resolveReactNativeDirectory() {
+    def reactNativeLocation = safeAppExtGet("REACT_NATIVE_NODE_MODULES_DIR", null)
+    if (reactNativeLocation != null) {
+        return file(reactNativeLocation)
+    }
+
+    // monorepo workaround
+    // react-native can be hoisted or in project's own node_modules
+    def reactNativeFromProjectNodeModules = file("${rootProject.projectDir}/../node_modules/react-native")
+    if (reactNativeFromProjectNodeModules.exists()) {
+        return reactNativeFromProjectNodeModules
+    }
+
+    def reactNativeFromReanimatedMonorepo = file("${projectDir}/../../../node_modules/react-native")
+    if (reactNativeFromReanimatedMonorepo.exists()) {
+        return reactNativeFromReanimatedMonorepo
+    }
+    
+    def reactNativeFromNodeModulesWithReanimated = file("${projectDir}/../../react-native")
+    if (reactNativeFromNodeModulesWithReanimated.exists()) {
+        return reactNativeFromNodeModulesWithReanimated
+    }
+
+    throw new GradleException(
+        "[react-native-svg] Unable to resolve react-native location in node_modules. You should project extension property (in `app/build.gradle`) `REACT_NATIVE_NODE_MODULES_DIR` with path to react-native."
+    )
+}
+
+def reactNativeRootDir = resolveReactNativeDirectory()
+
+def reactProperties = new Properties()
+file("$reactNativeRootDir/ReactAndroid/gradle.properties").withInputStream { reactProperties.load(it) }
+
+def REACT_NATIVE_VERSION = reactProperties.getProperty("VERSION_NAME")
+def REACT_NATIVE_MINOR_VERSION = REACT_NATIVE_VERSION.startsWith("0.0.0-") ? 1000 : REACT_NATIVE_VERSION.split("\\.")[1].toInteger()
+
 if (isNewArchitectureEnabled()) {
     apply plugin: "com.facebook.react"
 }
@@ -78,6 +119,15 @@ android {
                         "src/paper/java",
                 ]
             }
+            // Fix for RN 0.74 change that changed getHitSlopRect java method to hitSlopRect kotlin property
+            // causing backwards compatibility issues while using kotlin (override val vs override fun) 
+            // https://github.com/facebook/react-native/commit/803c5bb669b5df04af37279a8fe31faff8bf92ad 
+            if(REACT_NATIVE_MINOR_VERSION <= 73) {
+                srcDirs += "src/reactNativeVersionPatch/hitSlopView/73"
+            } else {
+                srcDirs +=  "src/reactNativeVersionPatch/hitSlopView/latest"
+            }
+
         }
     }
     kotlinOptions {

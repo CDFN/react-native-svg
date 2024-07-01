@@ -42,7 +42,7 @@ const val JOIN_ROUND: Int = 1
 const val CAP_ROUND: Int = 1
 const val FILL_RULE_NONZERO: Int = 1
 
-abstract class RenderableView internal constructor(reactContext: ReactContext) : VirtualView(reactContext), ReactHitSlopView {
+abstract class RenderableView internal constructor(reactContext: ReactContext) : HitSlopVirtualView(reactContext) {
     // static final int VECTOR_EFFECT_INHERIT = 2;
     // static final int VECTOR_EFFECT_URI = 3;
     /*
@@ -88,13 +88,6 @@ abstract class RenderableView internal constructor(reactContext: ReactContext) :
     private var mOriginProperties: ArrayList<Any?> = ArrayList()
     private var mPropList: ArrayList<String> = ArrayList()
     private var attributeList: ArrayList<String> = ArrayList()
-
-
-    override fun getHitSlopRect(): Rect? {
-        return if (mPointerEvents == PointerEvents.BOX_NONE) {
-            Rect(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
-        } else null
-    }
 
     init {
         setPivotX(0f)
