@@ -27,7 +27,11 @@ class SvgLoadEvent(surfaceId: Int, viewId: Int, mContext: ReactContext?, uriStri
         eventData.putDouble("width", width.toDouble())
         eventData.putDouble("height", height.toDouble())
         eventData.putString("uri", uri)
-        return eventData
+
+        val event = Arguments.createMap()
+        event.putMap("source", eventData)
+
+        return event
     }
 
     companion object {
