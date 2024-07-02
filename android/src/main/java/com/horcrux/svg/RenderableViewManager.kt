@@ -12,11 +12,11 @@ import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup.OnHierarchyChangeListener
 import com.facebook.react.bridge.Dynamic
-import com.facebook.react.bridge.JavaOnlyArray
 import com.facebook.react.bridge.JavaOnlyMap
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
+import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.DisplayMetricsHolder
 import com.facebook.react.uimanager.LayoutShadowNode
 import com.facebook.react.uimanager.MatrixMathHelper
@@ -69,10 +69,12 @@ import com.facebook.react.viewmanagers.RNSVGTextPathManagerDelegate
 import com.facebook.react.viewmanagers.RNSVGTextPathManagerInterface
 import com.facebook.react.viewmanagers.RNSVGUseManagerDelegate
 import com.facebook.react.viewmanagers.RNSVGUseManagerInterface
+import com.horcrux.svg.events.SvgLoadEvent
 import javax.annotation.Nonnull
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
+
 
 /** ViewManager for DefinitionView RNSVG views  */
 internal open class VirtualViewManager<V : VirtualView> protected constructor(protected val svgClass: SVGClass) : ViewGroupManager<V>() {
@@ -721,6 +723,12 @@ internal open class RenderableViewManager<T : RenderableView>(svgclass: SVGClass
         @ReactProp(name = "meetOrSlice")
         public override fun setMeetOrSlice(node: ImageView, meetOrSlice: Int) {
             node.setMeetOrSlice(meetOrSlice)
+        }
+
+        override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any> {
+            val eventTypes: MutableMap<String, Any> = HashMap()
+            eventTypes[SvgLoadEvent.EVENT_NAME] = MapBuilder.of("registrationName", "onLoad")
+            return eventTypes
         }
 
         companion object {

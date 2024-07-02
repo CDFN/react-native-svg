@@ -28,8 +28,10 @@ import com.facebook.react.bridge.Dynamic
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.ReactConstants
+import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.views.imagehelper.ImageSource
 import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper
+import com.horcrux.svg.events.SvgLoadEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.Nonnull
 
@@ -121,6 +123,15 @@ internal class ImageView(reactContext: ReactContext) : RenderableView(reactConte
         val dataSource = imagePipeline.fetchDecodedImage(request, mContext)
         val subscriber: BaseBitmapDataSubscriber = object : BaseBitmapDataSubscriber() {
             public override fun onNewResultImpl(bitmap: Bitmap?) {
+                val mEventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(mContext, id)
+                mEventDispatcher!!.dispatchEvent(SvgLoadEvent(
+                        UIManagerHelper.getSurfaceId(this@ImageView),
+                        id,
+                        mContext,
+                        uriString,
+                        bitmap!!.width.toFloat(),
+                        bitmap.height.toFloat(),
+                ))
                 mLoading.set(false)
                 val view = svgView
                 view?.invalidate()
