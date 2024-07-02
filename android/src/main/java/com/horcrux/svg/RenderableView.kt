@@ -10,6 +10,8 @@ package com.horcrux.svg
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.DashPathEffect
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -265,58 +267,65 @@ abstract class RenderableView internal constructor(reactContext: ReactContext) :
 
     public override fun render(canvas: Canvas, paint: Paint, opacity: Float) {
         var mask: MaskView? = null
+
         if (mMask != null) {
             val root: SvgView? = svgView
             mask = root!!.getDefinedMask(mMask!!) as MaskView?
         }
         if (mask != null) {
-            val clipBounds: Rect = canvas.getClipBounds()
-            val height: Int = clipBounds.height()
-            val width: Int = clipBounds.width()
-            val maskBitmap: Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val original: Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val result: Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val originalCanvas: Canvas = Canvas(original)
-            val maskCanvas: Canvas = Canvas(maskBitmap)
-            val resultCanvas: Canvas = Canvas(result)
+            // https://www.w3.org/TR/SVG11/masking.html
+            // Adding a mask involves several steps
+            // 1. applying luminanceToAlpha to the mask element
+            // 2. merging the alpha channel of the element with the alpha channel from the previous step
+            // 3. applying the result from step 2 to the target element
 
-            // Clip to mask bounds and render the mask
+            canvas.saveLayer(null, paint)
+            draw(canvas, paint, opacity)
+
+            val dstInPaint = Paint()
+            dstInPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_IN))
+
+            // prepare step 3 - combined layer
+            canvas.saveLayer(null, dstInPaint);
+
+            // step 1 - luminance layer
+            // prepare maskPaint with luminanceToAlpha
+            // https://www.w3.org/TR/SVG11/filters.html#InterfaceSVGFEMergeElement:~:text=not%20applicable.%20A-,luminanceToAlpha,-operation%20is%20equivalent
+            val luminancePaint = Paint()
+            val luminanceToAlpha = ColorMatrix(
+                    floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0.2125f, 0.7154f, 0.0721f, 0f, 0f)
+            )
+            luminancePaint.colorFilter = ColorMatrixColorFilter(luminanceToAlpha)
+            canvas.saveLayer(null, luminancePaint)
+
+            // calculate mask bounds
             val maskX: Float = relativeOnWidth((mask.mX)!!).toFloat()
             val maskY: Float = relativeOnHeight((mask.mY)!!).toFloat()
             val maskWidth: Float = relativeOnWidth((mask.mW)!!).toFloat()
             val maskHeight: Float = relativeOnHeight((mask.mH)!!).toFloat()
-            maskCanvas.clipRect(maskX, maskY, maskWidth + maskX, maskHeight + maskY)
-            val maskPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
-            mask.draw(maskCanvas, maskPaint, 1f)
+            // clip to mask bounds
+            canvas.clipRect(maskX, maskY, maskX + maskWidth, maskY + maskHeight);
 
-            // Apply luminanceToAlpha filter primitive
-            // https://www.w3.org/TR/SVG11/filters.html#feColorMatrixElement
-            val nPixels: Int = width * height
-            val pixels: IntArray = IntArray(nPixels)
-            maskBitmap.getPixels(pixels, 0, width, 0, 0, width, height)
-            for (i in 0 until nPixels) {
-                val color: Int = pixels.get(i)
-                val r: Int = (color shr 16) and 0xFF
-                val g: Int = (color shr 8) and 0xFF
-                val b: Int = color and 0xFF
-                val a: Int = color ushr 24
-                val luminance: Double = saturate(((0.299 * r) + (0.587 * g) + (0.144 * b)) / 255)
-                val alpha: Int = (a * luminance).toInt()
-                val pixel: Int = (alpha shl 24)
-                pixels[i] = pixel
-            }
-            maskBitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+            mask.draw(canvas, paint, 1f)
 
-            // Render content of current SVG Renderable to image
-            draw(originalCanvas, paint, opacity)
+            // close luminance layer
+            canvas.restore()
 
-            // Blend current element and mask
-            maskPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_IN))
-            resultCanvas.drawBitmap(original, 0f, 0f, null)
-            resultCanvas.drawBitmap(maskBitmap, 0f, 0f, maskPaint)
+            // step 2 - alpha layer
+            canvas.saveLayer(null, dstInPaint)
+            //clip to mask bounds
+            canvas.clipRect(maskX, maskY, maskX + maskWidth, maskY + maskHeight);
 
-            // Render composited result into current render context
-            canvas.drawBitmap(result, 0f, 0f, paint)
+            mask.draw(canvas, paint, 1f)
+
+            // close alpha layer
+            canvas.restore()
+
+            //close combined layer
+            canvas.restore()
+
+            //close element layer
+            canvas.restore()
         } else {
             draw(canvas, paint, opacity)
         }
